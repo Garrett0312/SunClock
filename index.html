@@ -32,7 +32,7 @@
     margin:0;
     min-height:100%;
     display:flex;
-    align-items:center;
+    /*align-items:center;*/
     justify-content:center;
     background:radial-gradient(120% 90% at 50% -10%, #131826 0%, var(--bg) 55%);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -42,6 +42,7 @@
   .app{
     width:100%;
     max-width:420px;
+    margin: auto;
   }
   .card{
     background:var(--card);
@@ -247,14 +248,17 @@
     .period{ grid-area:period; margin:0 0 2px; font-size:clamp(13px, 1.4vw, 17px); }
     .arc-wrap{
       grid-area:arc;
-      max-width:min(52vw, 720px);
+      /*max-width:min(52vw, 720px);*/
+      max-width:min(52vw, 720px, 85vh);
       width:100%;
       margin:4px auto 0;
     }
     .arc-clock{ font-size:clamp(16px, 1.8vw, 22px); }
     .times{ display:contents; }
-    #sunriseBlock{ grid-area:sunrise; align-self:center; }
-    #sunsetBlock{ grid-area:sunset; align-self:center; }
+    /*#sunriseBlock{ grid-area:sunrise; align-self:center; }
+    #sunsetBlock{ grid-area:sunset; align-self:center; }*/
+    #sunriseBlock{ grid-area:sunrise; align-self:end; margin-bottom: 12px; }
+    #sunsetBlock{ grid-area:sunset; align-self:end; margin-bottom: 12px; }
     .time-value{ font-size:clamp(26px, 3vw, 36px); }
     .moonrow{ grid-area:moon; margin-top:14px; padding-top:14px; }
     .moon-icon{ width:clamp(38px, 3.2vw, 50px); height:clamp(38px, 3.2vw, 50px); }
@@ -263,7 +267,8 @@
   }
 
   /* Very wide / short windows (e.g. a desktop popout) — trim vertical padding further */
-  @media (min-width:620px) and (max-height:360px){
+  /*@media (min-width:620px) and (max-height:360px){*/
+  @media (min-width:620px) and (max-height:450px){
     .card{ padding-top:16px; padding-bottom:10px; }
     .moonrow{ margin-top:10px; padding-top:10px; }
   }
