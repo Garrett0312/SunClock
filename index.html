@@ -30,19 +30,24 @@
   html,body{height:100%;}
   body{
     margin:0;
-    min-height:100%;
+    min-height:100vh;
+    min-height:100dvh;
     display:flex;
-    /*align-items:center;*/
     justify-content:center;
+    align-items:center;
     background:radial-gradient(120% 90% at 50% -10%, #131826 0%, var(--bg) 55%);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     color:var(--ink);
     padding:24px;
+    overflow-x:hidden;
   }
   .app{
     width:100%;
     max-width:420px;
-    margin: auto;
+    max-height:calc(100dvh - 48px);
+    margin:auto;
+    display:flex;
+    flex-direction:column;
   }
   .card{
     background:var(--card);
@@ -52,6 +57,8 @@
     box-shadow:0 30px 60px -30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
     position:relative;
     overflow:hidden;
+    width:100%;
+    max-height:100%;
   }
   .toprow{
     display:flex;
@@ -99,14 +106,21 @@
     width:100%;
     aspect-ratio:2/1;
     margin-top:6px;
+    min-height:0;
   }
-  .arc-wrap svg{width:100%;height:100%;overflow:visible;}
+  .arc-wrap svg{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    overflow:visible;
+  }
   .arc-clock{
     position:absolute;
     left:50%;
-    top:90%; /* matches the horizon line's y-position in the 300x150 viewBox (CY = 144/150) */
-    transform:translate(-50%,-100%);
-    margin-bottom:10px; /* small gap above the horizon line */
+    bottom:10px;
+    transform:translate(-50%, 0);
     font-size:15px;
     font-weight:650;
     color:var(--ink);
@@ -176,6 +190,7 @@
     gap:14px;
     transform:translateY(100%);
     transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index: 10;
   }
   .settings.open{transform:translateY(0);}
   .settings h2{font-size:15px;margin:0 0 2px;font-weight:650;}
@@ -228,55 +243,69 @@
     .card{padding:20px 18px 16px;}
   }
 
-  /* Horizontal layout for landscape phones, popped-out windows, and desktop —
-     mirrors the original wide, short "widget" shape instead of stacking tall. */
+  /* Horizontal layout for landscape phones, popped-out windows, and desktop */
   @media (min-width:620px){
-    .app{max-width:min(94vw, 1040px);}
-    .card{
-      display:grid;
-      grid-template-columns:minmax(112px,auto) minmax(260px,1fr) minmax(112px,auto);
+    body {
+      padding: clamp(12px, 3vh, 24px);
+    }
+    .app { 
+      max-width: min(94vw, 1040px);
+      height: 100%;
+      max-height: calc(100dvh - clamp(24px, 6vh, 48px)); 
+    }
+    /* Enforce 2:1 initial ratio frame until window/page is resized */
+    .app.initial-size {
+      /*width: min(92vw, 740px);*/
+      width: min(92vw, 1040px);
+      aspect-ratio: 2 / 1;
+      height: auto;
+    }
+    .card {
+      height: 100%;
+      display: grid;
+      grid-template-columns: minmax(112px,auto) minmax(260px,1fr) minmax(112px,auto);
+      grid-template-rows: auto auto 1fr auto auto;
       grid-template-areas:
         "top    top   top"
         "period period period"
         "sunrise arc  sunset"
         "moon   moon  moon"
         "footer footer footer";
-      column-gap:clamp(22px, 3vw, 48px);
-      padding:clamp(24px, 3vw, 40px) clamp(30px, 4vw, 56px) clamp(18px, 2.5vw, 32px);
+      column-gap: clamp(16px, 3vw, 48px);
+      row-gap: clamp(4px, 1vh, 12px);
+      padding: clamp(14px, 3vh, 36px) clamp(20px, 4vw, 56px) clamp(12px, 2vh, 28px);
     }
     .toprow{ grid-area:top; margin-bottom:0; }
-    .period{ grid-area:period; margin:0 0 2px; font-size:clamp(13px, 1.4vw, 17px); }
-    .arc-wrap{
-      grid-area:arc;
-      /*max-width:min(52vw, 720px);*/
-      max-width:min(52vw, 720px, 85vh);
-      width:100%;
-      margin:4px auto 0;
+    .period{ grid-area:period; margin:0; font-size:clamp(12px, 1.4vw, 17px); }
+    .arc-wrap {
+      grid-area: arc;
+      max-width: min(78vw, 860px); 
+      width: 100%;
+      height: 100%;
+      aspect-ratio: auto;
+      margin: 0 auto;
+      align-self: center;
     }
-    .arc-clock{ font-size:clamp(16px, 1.8vw, 22px); }
+    .arc-clock{ font-size:clamp(14px, 1.8vw, 22px); }
     .times{ display:contents; }
-    /*#sunriseBlock{ grid-area:sunrise; align-self:center; }
-    #sunsetBlock{ grid-area:sunset; align-self:center; }*/
-    #sunriseBlock{ grid-area:sunrise; align-self:end; margin-bottom: 12px; }
-    #sunsetBlock{ grid-area:sunset; align-self:end; margin-bottom: 12px; }
-    .time-value{ font-size:clamp(26px, 3vw, 36px); }
-    .moonrow{ grid-area:moon; margin-top:14px; padding-top:14px; }
-    .moon-icon{ width:clamp(38px, 3.2vw, 50px); height:clamp(38px, 3.2vw, 50px); }
-    .moon-phase-name{ font-size:clamp(14.5px, 1.5vw, 18px); }
-    .footer{ grid-area:footer; margin-top:10px; }
+    #sunriseBlock{ grid-area:sunrise; align-self:end; margin-bottom: clamp(4px, 1vh, 12px); }
+    #sunsetBlock{ grid-area:sunset; align-self:end; margin-bottom: clamp(4px, 1vh, 12px); }
+    .time-value{ font-size:clamp(22px, 3vw, 36px); }
+    .moonrow{ 
+      grid-area:moon; 
+      margin-top:clamp(6px, 1.5vh, 14px); 
+      padding-top:clamp(6px, 1.5vh, 14px); 
+    }
+    .moon-icon{ width:clamp(32px, 3.2vw, 50px); height:clamp(32px, 3.2vw, 50px); }
+    .moon-phase-name{ font-size:clamp(13px, 1.5vw, 18px); }
+    .footer{ grid-area:footer; margin-top:clamp(4px, 1vh, 10px); }
   }
 
-  /* Very wide / short windows (e.g. a desktop popout) — trim vertical padding further */
-  /*@media (min-width:620px) and (max-height:360px){*/
-  @media (min-width:620px) and (max-height:450px){
-    .card{ padding-top:16px; padding-bottom:10px; }
-    .moonrow{ margin-top:10px; padding-top:10px; }
-  }
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app initial-size">
   <div class="card" id="card">
 
     <div class="toprow">
@@ -296,7 +325,7 @@
     <div class="period" id="periodLabel">&nbsp;</div>
 
     <div class="arc-wrap">
-      <svg id="arcSvg" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet"></svg>
+      <svg id="arcSvg" viewBox="0 0 300 150" preserveAspectRatio="none"></svg>
       <div class="arc-clock" id="arcClock">–:––</div>
     </div>
 
@@ -361,7 +390,7 @@
 (function(){
   "use strict";
 
-  /* ---------- manifest (enables "add to home screen" when hosted) ---------- */
+  /* ---------- manifest ---------- */
   var manifest = {
     name: "Soft Time",
     short_name: "Soft Time",
@@ -387,44 +416,21 @@
   function fromJulian(j){ return new Date((j + 0.5 - J1970) * DAY_MS); }
   function toDays(date){ return toJulian(date) - J2000; }
 
-  function rightAscension(l, b){
-    return Math.atan2(Math.sin(l) * Math.cos(OBLIQUITY) - Math.tan(b) * Math.sin(OBLIQUITY), Math.cos(l));
-  }
-  function declination(l, b){
-    return Math.asin(Math.sin(b) * Math.cos(OBLIQUITY) + Math.cos(b) * Math.sin(OBLIQUITY) * Math.sin(l));
-  }
+  function rightAscension(l, b){ return Math.atan2(Math.sin(l) * Math.cos(OBLIQUITY) - Math.tan(b) * Math.sin(OBLIQUITY), Math.cos(l)); }
+  function declination(l, b){ return Math.asin(Math.sin(b) * Math.cos(OBLIQUITY) + Math.cos(b) * Math.sin(OBLIQUITY) * Math.sin(l)); }
   function solarMeanAnomaly(d){ return RAD * (357.5291 + 0.98560028 * d); }
   function eclipticLongitude(M){
     var C = RAD * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
     var P = RAD * 102.9372;
     return M + C + P + Math.PI;
   }
-  function sunDeclination(d){
-    var M = solarMeanAnomaly(d);
-    var L = eclipticLongitude(M);
-    return declination(L, 0);
-  }
   function siderealTime(d, lw){ return RAD * (280.16 + 360.9856235 * d) - lw; }
-  function sunCoords(d){
-    var M = solarMeanAnomaly(d);
-    var L = eclipticLongitude(M);
-    return { dec: declination(L, 0), ra: rightAscension(L, 0) };
-  }
-  function azimuth(H, phi, dec){
-    return Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi));
-  }
-  function altitude(H, phi, dec){
-    return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H));
-  }
-  function sunPosition(date, lat, lng){
-    var lw = RAD * -lng, phi = RAD * lat, d = toDays(date);
-    var c = sunCoords(d);
-    var H = siderealTime(d, lw) - c.ra;
-    return { azimuth: azimuth(H, phi, c.dec), altitude: altitude(H, phi, c.dec) };
-  }
+  function azimuth(H, phi, dec){ return Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi)); }
+  function altitude(H, phi, dec){ return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H)); }
+  
   function hourAngle(h, phi, dec){
     var cosH = (Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec));
-    if (cosH < -1 || cosH > 1) return null; // sun never crosses this altitude today (polar day/night)
+    if (cosH < -1 || cosH > 1) return null; 
     return Math.acos(cosH);
   }
   function sunTimes(date, lat, lng){
@@ -438,19 +444,16 @@
     var Jnoon = J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
     var h0 = RAD * -0.833;
     var w0 = hourAngle(h0, phi, dec);
-    if (w0 === null){
-      return { polar: true, alwaysUp: Math.sin(phi) * Math.sin(dec) > 0, solarNoon: fromJulian(Jnoon) };
-    }
+    if (w0 === null){ return { polar: true, alwaysUp: Math.sin(phi) * Math.sin(dec) > 0, solarNoon: fromJulian(Jnoon) }; }
     var Jset = J2000 + (0.0009 + (w0 + lw) / (2 * Math.PI) + n) + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
     var Jrise = Jnoon - (Jset - Jnoon);
     return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset), solarNoon: fromJulian(Jnoon), polar: false };
   }
 
-  /* ---------- moon position (simplified low-precision lunar ephemeris) ---------- */
   function moonCoords(d){
-    var L = RAD * (218.316 + 13.176396 * d);   // ecliptic longitude
-    var M = RAD * (134.963 + 13.064993 * d);   // mean anomaly
-    var F = RAD * (93.272 + 13.229350 * d);    // mean distance
+    var L = RAD * (218.316 + 13.176396 * d);
+    var M = RAD * (134.963 + 13.064993 * d);
+    var F = RAD * (93.272 + 13.229350 * d);
     var l = L + RAD * 6.289 * Math.sin(M);
     var b = RAD * 5.128 * Math.sin(F);
     return { ra: rightAscension(l, b), dec: declination(l, b) };
@@ -461,8 +464,6 @@
     var H = siderealTime(d, lw) - c.ra;
     return { altitude: altitude(H, phi, c.dec), azimuth: azimuth(H, phi, c.dec) };
   }
-  // Sample altitude across a window to find rise/set crossings (moon doesn't
-  // cross the horizon on the same clean daily schedule the sun does).
   function moonEvents(centerDate, lat, lng){
     var stepMin = 8;
     var start = new Date(centerDate.getTime() - 24 * 3600000);
@@ -491,14 +492,11 @@
   }
   function nextMoonEventLabel(events, now){
     for (var i = 0; i < events.length; i++){
-      if (events[i].time > now){
-        return (events[i].rising ? "Moonrise " : "Moonset ") + fmtTime(events[i].time);
-      }
+      if (events[i].time > now){ return (events[i].rising ? "Moonrise " : "Moonset ") + fmtTime(events[i].time); }
     }
     return "";
   }
 
-  /* ---------- moon phase ---------- */
   function moonPhase(date){
     var synodic = 29.530588861;
     var knownNew = Date.UTC(2000, 0, 6, 18, 14);
@@ -517,32 +515,14 @@
     if (phase < 0.76) return "Last Quarter";
     return "Waning Crescent";
   }
-  function moonIllumination(phase){
-    return (1 - Math.cos(2 * Math.PI * phase)) / 2;
-  }
-  /*function moonSvgPath(phase, r){
-    var rx = Math.abs(Math.cos(2 * Math.PI * phase)) * r;
-    // var sweep1 = phase < 0.5 ? 1 : 0;
-    // var sweep2 = (phase < 0.25 || phase > 0.75) ? 0 : 1;
-    //var sweep1 = phase < 0.5 ? 0 : 1;
-    //var sweep2 = (phase < 0.25 || phase > 0.75) ? 1 : 0;
-    var sweep1 = phase < 0.25 ? 0 : 1;
-    //var sweep2 = (phase < 0.5 || phase > 0.75) ? 0 : 1;
-    var sweep2 = (phase < 0.5 ) ? 0 : 1;
-    return "M 0 " + (-r) + " A " + rx + " " + r + " 0 0 " + sweep1 + " 0 " + r +
-           " A " + r + " " + r + " 0 0 " + sweep2 + " 0 " + (-r) + " Z";
-  }*/
- 
+  function moonIllumination(phase){ return (1 - Math.cos(2 * Math.PI * phase)) / 2; }
   function moonSvgPath(phase, r){
     var rx = Math.abs(Math.cos(2 * Math.PI * phase)) * r;
-    // sweep1 controls the inner shadow curve (terminator)
     var sweep1 = (phase % 0.5) < 0.25 ? 1 : 0;
-    // sweep2 controls the outer lit edge
     var sweep2 = phase < 0.5 ? 0 : 1;
     return "M 0 " + (-r) + " A " + rx + " " + r + " 0 0 " + sweep1 + " 0 " + r +
            " A " + r + " " + r + " 0 0 " + sweep2 + " 0 " + (-r) + " Z";
   }
-
   function renderMoonIcon(phase){
     var r = 17;
     var svg = document.getElementById("moonIcon");
@@ -552,23 +532,56 @@
       '<path d="' + lit + '" fill="var(--silver)"/>';
   }
 
-  /* ---------- arc rendering ---------- */
-  var VB_W = 300, VB_H = 150, PAD = 26;
-  var CX = VB_W / 2, CY = VB_H - 6, R = VB_W / 2 - PAD;
+  /* ---------- arc rendering & UI state cache ---------- */
+  var CX, CY, Rx, Ry;
+  
+  var currentDrawState = {
+    sunVisible: false, sunT: 0,
+    moonVisible: false, moonT: 0, phase: 0
+  };
 
   function arcPoint(t){
-    // t: 0 at left horizon (sunrise), 1 at right horizon (sunset), over the top semicircle
     var angle = Math.PI * t;
-    return { x: CX - R * Math.cos(angle), y: CY - R * Math.sin(angle) };
+    return { x: CX - Rx * Math.cos(angle), y: CY - Ry * Math.sin(angle) };
+  }
+
+  function resizeArc() {
+    var svg = document.getElementById("arcSvg");
+    var wrap = document.querySelector(".arc-wrap");
+    var w = wrap.clientWidth || 300;
+    var h = wrap.clientHeight || 150;
+    
+    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+    
+    CX = w / 2;
+    CY = h - 6; 
+    Rx = (w / 2) - 26; 
+    Ry = h - 26;       
+    
+    if (Rx < 1) Rx = 1;
+    if (Ry < 1) Ry = 1;
+
+    var path = document.getElementById("baseArcPath");
+    if (path) path.setAttribute("d", "M " + (CX - Rx) + " " + CY + " A " + Rx + " " + Ry + " 0 0 1 " + (CX + Rx) + " " + CY);
+    
+    var horizon = document.getElementById("horizonLine");
+    if (horizon) {
+      horizon.setAttribute("x1", CX - Rx - 4);
+      horizon.setAttribute("x2", CX + Rx + 4);
+      horizon.setAttribute("y1", CY);
+      horizon.setAttribute("y2", CY);
+    }
+    
+    if (typeof state !== 'undefined' && state.lat != null) {
+      updateBodies(currentDrawState.sunVisible, currentDrawState.sunT, currentDrawState.moonVisible, currentDrawState.moonT, currentDrawState.phase);
+    }
   }
 
   function initArcBase(){
     var svg = document.getElementById("arcSvg");
-    svg.setAttribute("viewBox", "0 0 " + VB_W + " " + VB_H);
     var ns = "http://www.w3.org/2000/svg";
+    
     var path = document.createElementNS(ns, "path");
-    var d = "M " + (CX - R) + " " + CY + " A " + R + " " + R + " 0 0 1 " + (CX + R) + " " + CY;
-    path.setAttribute("d", d);
     path.setAttribute("fill", "none");
     path.setAttribute("stroke", "var(--arc)");
     path.setAttribute("stroke-width", "1.5");
@@ -576,10 +589,7 @@
     svg.appendChild(path);
 
     var horizon = document.createElementNS(ns, "line");
-    horizon.setAttribute("x1", CX - R - 4);
-    horizon.setAttribute("x2", CX + R + 4);
-    horizon.setAttribute("y1", CY);
-    horizon.setAttribute("y2", CY);
+    horizon.setAttribute("id", "horizonLine");
     horizon.setAttribute("stroke", "rgba(255,255,255,0.05)");
     horizon.setAttribute("stroke-width", "1");
     svg.appendChild(horizon);
@@ -592,6 +602,7 @@
     var s2 = document.createElementNS(ns, "stop");
     s2.setAttribute("offset", "100%"); s2.setAttribute("stop-color", "var(--gold)"); s2.setAttribute("stop-opacity", "0");
     sunGrad.appendChild(s1); sunGrad.appendChild(s2);
+    
     var moonGrad = document.createElementNS(ns, "radialGradient");
     moonGrad.setAttribute("id", "moonGlowGrad");
     var m1 = document.createElementNS(ns, "stop");
@@ -602,7 +613,6 @@
     defs.appendChild(sunGrad); defs.appendChild(moonGrad);
     svg.appendChild(defs);
 
-    // moon marker (drawn first, so the sun renders above it if they ever overlap)
     var moonGlow = document.createElementNS(ns, "circle");
     moonGlow.setAttribute("id", "moonGlow");
     moonGlow.setAttribute("r", "8");
@@ -625,7 +635,6 @@
     moonG.appendChild(moonLit);
     svg.appendChild(moonG);
 
-    // sun marker
     var sunGlow = document.createElementNS(ns, "circle");
     sunGlow.setAttribute("id", "sunGlow");
     sunGlow.setAttribute("r", "16");
@@ -639,6 +648,8 @@
     sunDot.setAttribute("fill", "var(--gold)");
     sunDot.style.display = "none";
     svg.appendChild(sunDot);
+    
+    resizeArc();
   }
 
   function setMarker(glowEl, dotEl, visible, t){
@@ -654,23 +665,6 @@
     dotEl.setAttribute("cx", p.x); dotEl.setAttribute("cy", p.y);
   }
 
-  /*function updateBodies(sunVisible, sunT, moonVisible, moonT, moonPhaseVal){
-    setMarker(document.getElementById("sunGlow"), document.getElementById("sunDot"), sunVisible, sunT);
-    var moonGlow = document.getElementById("moonGlow");
-    var moonG = document.getElementById("moonMark");
-    if (!moonVisible){
-      moonGlow.style.display = "none";
-      moonG.style.display = "none";
-      return;
-    }
-    var p = arcPoint(Math.max(0, Math.min(1, moonT)));
-    moonGlow.style.display = "";
-    moonG.style.display = "";
-    moonGlow.setAttribute("cx", p.x); moonGlow.setAttribute("cy", p.y);
-    moonG.setAttribute("transform", "translate(" + p.x + "," + p.y + ")");
-    document.getElementById("moonMarkPath").setAttribute("d", moonSvgPath(moonPhaseVal, 5.5));
-  }*/
-
   function updateBodies(sunVisible, sunT, moonVisible, moonT, moonPhaseVal){
     setMarker(document.getElementById("sunGlow"), document.getElementById("sunDot"), sunVisible, sunT);
     var moonGlow = document.getElementById("moonGlow");
@@ -685,17 +679,15 @@
     }
     
     var p = arcPoint(Math.max(0, Math.min(1, moonT)));
-    var rot = (moonT - 0.5) * 180; // Maps trajectory to an angle between -90 and +90
+    var rot = (moonT - 0.5) * 180;
     
     moonGlow.style.display = "";
     moonG.style.display = "";
     moonGlow.setAttribute("cx", p.x); moonGlow.setAttribute("cy", p.y);
     
-    // Add the rotation into the SVG transform
     moonG.setAttribute("transform", "translate(" + p.x + "," + p.y + ") rotate(" + rot + ")");
     document.getElementById("moonMarkPath").setAttribute("d", moonSvgPath(moonPhaseVal, 5.5));
     
-    // Rotate the main UI icon to match
     if(mainMoonIcon) mainMoonIcon.style.transform = "rotate(" + 5.5 + "deg)";
   }
 
@@ -709,14 +701,9 @@
   }
 
   function periodLabel(now, times){
-    if (!times || times.polar){
-      return times && times.alwaysUp ? "Sun never sets today" : "Sun stays below the horizon today";
-    }
+    if (!times || times.polar){ return times && times.alwaysUp ? "Sun never sets today" : "Sun stays below the horizon today"; }
     var sunrise = times.sunrise, sunset = times.sunset, noon = times.solarNoon;
-    var hour = now.getHours();
-    if (now < sunrise){
-      return (sunrise - now) < 45 * 60000 ? "Early twilight" : "Still night";
-    }
+    if (now < sunrise){ return (sunrise - now) < 45 * 60000 ? "Early twilight" : "Still night"; }
     if (now >= sunrise && now - sunrise < 60 * 60000) return "Sunrise";
     if (Math.abs(now - noon) < 90 * 60000) return "Midday";
     if (now < noon) return "Morning";
@@ -783,22 +770,26 @@
       moonVisible = mWindow.start.rising;
       moonT = (now - mWindow.start.time) / (mWindow.end.time - mWindow.start.time);
     } else {
-      // no crossing found in the sampled window (rare) — fall back to instantaneous altitude
       var curAlt = moonPosition(now, state.lat, state.lon).altitude;
       moonVisible = curAlt > 0;
       moonT = 0.5;
     }
+    
+    currentDrawState.sunVisible = sunVisible;
+    currentDrawState.sunT = sunT;
+    currentDrawState.moonVisible = moonVisible;
+    currentDrawState.moonT = moonT;
+    currentDrawState.phase = phase;
+
     var nextEvent = nextMoonEventLabel(mEvents, now);
     document.getElementById("moonSub").textContent = illum + "% illuminated" + (nextEvent ? " · " + nextEvent : "");
 
     updateBodies(sunVisible, sunT, moonVisible, moonT, phase);
-
     document.getElementById("updatedAt").textContent = "updated " + fmtTime(now);
   }
 
   /* ---------- geocoding + geolocation ---------- */
   function reverseGeocode(lat, lon){
-    var status = document.getElementById("geoStatus");
     fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + lat + "&longitude=" + lon + "&localityLanguage=en")
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -808,7 +799,7 @@
         document.getElementById("placeName").textContent = state.place;
         saveState();
       })
-      .catch(function(){ /* silent: lat/lon still works without a name */ });
+      .catch(function(){});
   }
 
   function useGeolocation(){
@@ -890,7 +881,14 @@
     citySearchTimer = setTimeout(function(){ citySearch(val); }, 300);
   });
   document.getElementById("popoutBtn").addEventListener("click", function(){
-    window.open(location.href, "softtime_popout", "width=740,height=460,menubar=no,toolbar=no,location=no,status=no");
+    window.open(location.href, "softtime_popout", "width=740,height=370,menubar=no,toolbar=no,location=no,status=no");
+  });
+
+  /* ---------- clear initial-size lock on resize ---------- */
+  window.addEventListener("resize", function onFirstResize() {
+    var appEl = document.querySelector(".app");
+    if (appEl) appEl.classList.remove("initial-size");
+    window.removeEventListener("resize", onFirstResize);
   });
 
   /* ---------- init ---------- */
@@ -907,6 +905,12 @@
 
   setInterval(render, 30000);
   setInterval(updateClockFace, 15000);
+  
+  var resizeObserver = new ResizeObserver(function() {
+    window.requestAnimationFrame(resizeArc);
+  });
+  resizeObserver.observe(document.querySelector(".arc-wrap"));
+  
 })();
 </script>
 </body>
